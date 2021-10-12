@@ -117,8 +117,9 @@ def value_transform(df):
     if type_transform == "Remove Whitespace":
         df[col_transform] = df[col_transform].str.replace(" ", "")
 
-    if col_transform != "Select Option":
+    if col_transform != "Select Column":
         st.write(df[col_transform])
+    
 
     return df
 
@@ -147,7 +148,7 @@ def dtype_convert(df):
             df[col_convert] = df[col_convert].astype(float)
         except:
             st.write("Can not convert")
-    if col_convert != "Select Type":
+    if col_convert != "Select Column":
         st.write(df[col_convert])
     return df
 
