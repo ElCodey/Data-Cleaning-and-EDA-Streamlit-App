@@ -28,6 +28,7 @@ def file_upload():
 def data_eda():
     #st.sidebar.selectbox("Use Example CSV", ["dummy_df", "dumm_df_2"])
     df = file_upload()
+    
     eda_option = st.selectbox("Select EDA Option", ["View DF", "Head", "Tail", "Column Names",
                                                     "Shape", "DF Stats", "Null Values"])
     if eda_option == "View DF":
@@ -53,8 +54,9 @@ def col_eda(df):
     column_names = []
     for i in df.columns:
         column_names.append(i)
-    col_select = st.selectbox("Select Columns to Explore", column_names)
-    eda_select = st.selectbox("Select Option to Explore", ["Choose Option", "Data Types", "Value Counts", "Mean", "Median",
+    col1, col2 = st.columns(2)
+    col_select = col1.selectbox("Select Columns to Explore", column_names)
+    eda_select = col2.selectbox("Select Option to Explore", ["Choose Option", "Data Types", "Value Counts", "Mean", "Median",
                                                             "Groupby & Mean", "Groupby & Median"])
     if eda_select == "Data Types":
         st.write(df[col_select].dtypes)
@@ -102,16 +104,34 @@ def rename_cols(df):
         column_names.append(i)
     
 
-def data_clean(df):
-    st.subheader("Removing Null Values")
-    st.write(df.isnull().sum())
-    
+def value_transform(df):
+    st.subheader("Value Transformations")
+
     column_names = ["Select Column"]
     for i in df.columns:
         column_names.append(i)
+    col1, col2 = st.columns(2)
+    col_transform = col1.selectbox("Select Column to Transform", column_names)
+    type_transform = col2.selectbox("Select Transformation", ["Select Option", "Replace Values", "Remove Whitespace",
+                                                              "Extract Digits"])
+    if type_transform == "Remove Whitespace":
+        df[col_transform] = df[col_transform].str.replace(" ", "")
 
-    col_convert = st.selectbox("Select Column to Convert Data Type", column_names)
-    type_convert = st.selectbox("Select Type to Convert", ["Select Type", "String", "Int", "Float"])
+    if col_transform != "Select Option":
+        st.write(df[col_transform])
+
+    return df
+
+def dtype_convert(df):
+    st.subheader("Removing Null Values")
+    st.write(df.isnull().sum())
+
+    column_names = ["Select Column"]
+    for i in df.columns:
+        column_names.append(i)
+    col1, col2 = st.columns(2)
+    col_convert = col1.selectbox("Select Column to Convert Data Type", column_names)
+    type_convert = col2.selectbox("Select Type to Convert", ["Select Type", "String", "Int", "Float"])
     if type_convert == "String":
         try:
             df[col_convert] = df[col_convert].astype(str)
@@ -127,8 +147,17 @@ def data_clean(df):
             df[col_convert] = df[col_convert].astype(float)
         except:
             st.write("Can not convert")
-    col_select = st.selectbox("Select Column to replace Null with Mean or Median", column_names)
-    option_select = st.selectbox("Mean or Median", ["Select Option", "Mean", "Median"])
+    if col_convert != "Select Type":
+        st.write(df[col_convert])
+    return df
+
+def remove_null(df):
+    column_names = ["Select Column"]
+    for i in df.columns:
+        column_names.append(i)
+    col1, col2 = st.columns(2)
+    col_select = col1.selectbox("Select Column to replace Null with Mean or Median (Int or Float Only)", column_names)
+    option_select = col2.selectbox("Mean or Median", ["Select Option", "Mean", "Median"])
     if option_select == "Mean":
         try:
             df[col_select] = df[col_select].fillna(df[col_select].mean())
@@ -145,7 +174,9 @@ def data_clean(df):
     if null_clean == "Remove Null Values":
         df = df.dropna()
     st.write(df.shape)
+
     return df
     
-
-data_clean(df)
+df = value_transform(df)
+df = dtype_convert(df)
+df = remove_null(df)
