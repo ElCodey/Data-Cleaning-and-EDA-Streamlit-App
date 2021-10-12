@@ -66,22 +66,22 @@ def col_eda(df):
         try:
             st.write(df[col_select].mean())
         except:
-            st.write("Invalid Data Type")
+            st.error("Invalid Data Type")
     if eda_select == "Median":
         try:
             st.write(df[col_select].median())
         except:
-            st.write("Invalid Data Type")
+            st.error("Invalid Data Type")
     if eda_select == "Groupby & Mean":
         try:
             st.write(df.groupby(col_select).mean())
         except:
-            st.write("Invalid Data Type")
+            st.error("Invalid Data Type")
     if eda_select == "Groupby & Median":
         try:
             st.write(df.groupby(col_select).median())
         except:
-            st.write("Invalid Data Type")
+            st.error("Invalid Data Type")
 
 col_eda(df)
 def drop_columns(df):
@@ -92,7 +92,7 @@ def drop_columns(df):
     try:
         df = df.drop(drop_cols, axis=1)
     except:
-        st.write("Invalid column names, please try again.")
+        st.error("Invalid column names, please try again.")
     st.write(df.head(5))
     return df
 
