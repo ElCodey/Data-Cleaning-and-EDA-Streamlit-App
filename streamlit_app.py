@@ -116,7 +116,13 @@ def value_transform(df):
                                                               "Extract Digits"])
     if type_transform == "Remove Whitespace":
         df[col_transform] = df[col_transform].str.replace(" ", "")
-
+    if type_transform == "Replace Values":
+        replace_text = st.text_input("Input Values to Replace")
+        replace_with_text = st.text_input("Input Value to Replace with. Press Enter in box to remove value")
+        try:
+            df[col_transform] = df[col_transform].str.replace(replace_text, replace_with_text)
+        except:
+            st.error("An error has occured.")
     if col_transform != "Select Column":
         st.write(df[col_transform])
     
@@ -137,17 +143,17 @@ def dtype_convert(df):
         try:
             df[col_convert] = df[col_convert].astype(str)
         except:
-            st.write("Can not convert")
+            st.error("Can't Convert")
     elif type_convert == "Int":
         try:
             df[col_convert] = df[col_convert].astype(int)
         except:
-            st.write("Can not convert")
+            st.error("Can't Convert")
     elif type_convert == "Float":
         try:
             df[col_convert] = df[col_convert].astype(float)
         except:
-            st.write("Can not convert")
+            st.error("Can't Convert")
     if col_convert != "Select Column":
         st.write(df[col_convert])
     return df
@@ -163,12 +169,12 @@ def remove_null(df):
         try:
             df[col_select] = df[col_select].fillna(df[col_select].mean())
         except:
-            st.write("Invalid Column Type to fill with Mean")
+            st.error("Invalid Column Type to fill with Mean")
     elif option_select == "Median":
         try:
             df[col_select] = df[col_select].fillna(df[col_select].median())
         except:
-            st.write("Invalid Column Type to fill with Median")
+            st.error("Invalid Column Type to fill with Median")
    
 
     null_clean = st.selectbox("Drop All Null Values", ["Please Select Option", "Remove Null Values"])
