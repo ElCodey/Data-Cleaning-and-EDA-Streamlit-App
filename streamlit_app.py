@@ -1,6 +1,6 @@
 import pandas as pd
 import streamlit as st
-import io
+import re
 
 
 st.set_option("deprecation.showfileUploaderEncoding", False)
@@ -85,6 +85,7 @@ def col_eda(df):
 
 col_eda(df)
 def drop_columns(df):
+    st.subheader("Drop Columns")
     column_names = []
     for i in df.columns:
         column_names.append(i)
@@ -102,7 +103,18 @@ def rename_cols(df):
     column_names = []
     for i in df.columns:
         column_names.append(i)
-    
+
+def convert_to_int_if_error_return_zero(x):
+    try:
+        return int(x)
+    except:
+        return 0  
+
+def convert_to_float_if_error_return_zero(x):
+    try:
+        return float(x)
+    except:
+        return 0  
 
 def value_transform(df):
     st.subheader("Value Transformations")
@@ -123,11 +135,15 @@ def value_transform(df):
             df[col_transform] = df[col_transform].str.replace(replace_text, replace_with_text)
         except:
             st.error("An error has occured.")
+    if type_transform == "Extract Digits":
+        df[col_transform] = df[col_transform].apply(lambda x: "".join(filter(str.isdigit, x)))
     if col_transform != "Select Column":
         st.write(df[col_transform])
-    
-
-    return df
+    another_transformation = st.selectbox("Would you like another value transformation?", ["Select Option", "Yes", "No"])
+    if another_transformation == "Yes":
+        return value_transform(df)
+    else:
+        return df
 
 def dtype_convert(df):
     st.subheader("Removing Null Values")
@@ -146,12 +162,12 @@ def dtype_convert(df):
             st.error("Can't Convert")
     elif type_convert == "Int":
         try:
-            df[col_convert] = df[col_convert].astype(int)
+            df[col_convert] = df[col_convert].apply(convert_to_int_if_error_return_zero)
         except:
             st.error("Can't Convert")
     elif type_convert == "Float":
         try:
-            df[col_convert] = df[col_convert].astype(float)
+            df[col_convert] = df[col_convert].apply(convert_to_float_if_error_return_zero)
         except:
             st.error("Can't Convert")
     if col_convert != "Select Column":
