@@ -2,7 +2,6 @@ import pandas as pd
 import streamlit as st
 import re
 
-
 st.set_option("deprecation.showfileUploaderEncoding", False)
 st.title("Data Cleaning and Visualisation App")
 st.subheader("EDA")
@@ -25,9 +24,9 @@ def file_upload():
 ###
   
 
-def data_eda():
+def data_eda(df):
     #st.sidebar.selectbox("Use Example CSV", ["dummy_df", "dumm_df_2"])
-    df = file_upload()
+    
     
     eda_option = st.selectbox("Select EDA Option", ["View DF", "Head", "Tail", "Column Names",
                                                     "Shape", "DF Stats", "Null Values"])
@@ -46,9 +45,9 @@ def data_eda():
     elif eda_option == "Null Values":
         st.write(df.isnull().sum())
 
-    return df
+    
 
-df = data_eda()
+
 
 def col_eda(df):
     column_names = []
@@ -83,7 +82,7 @@ def col_eda(df):
         except:
             st.error("Invalid Data Type")
 
-col_eda(df)
+
 def drop_columns(df):
     st.subheader("Drop Columns")
     column_names = []
@@ -97,7 +96,7 @@ def drop_columns(df):
     st.write(df.head(5))
     return df
 
-df = drop_columns(df)
+
 
 def rename_cols(df):
     column_names = []
@@ -115,6 +114,8 @@ def convert_to_float_if_error_return_zero(x):
         return float(x)
     except:
         return 0  
+def float_regex(x):
+    return re.findall(r"[-+]?\d*\.\d+|\d+", x)
 
 def value_transform(df):
     st.subheader("Value Transformations")
@@ -125,7 +126,7 @@ def value_transform(df):
     col1, col2 = st.columns(2)
     col_transform = col1.selectbox("Select Column to Transform", column_names)
     type_transform = col2.selectbox("Select Transformation", ["Select Option", "Replace Values", "Remove Whitespace",
-                                                              "Extract Digits"])
+                                                              "Extract Positive Ints", "Extract Float"])
     if type_transform == "Remove Whitespace":
         df[col_transform] = df[col_transform].str.replace(" ", "")
     if type_transform == "Replace Values":
@@ -135,8 +136,12 @@ def value_transform(df):
             df[col_transform] = df[col_transform].str.replace(replace_text, replace_with_text)
         except:
             st.error("An error has occured.")
-    if type_transform == "Extract Digits":
+    if type_transform == "Extract Positive Ints":
         df[col_transform] = df[col_transform].apply(lambda x: "".join(filter(str.isdigit, x)))
+    if type_transform == "Extract Float":
+        df[col_transform] = df[col_transform].apply(str)
+        df[col_transform] = df[col_transform].apply(lambda x: "".join(float_regex(x)))
+        df[col_transform] = df[col_transform].apply(str)
     if col_transform != "Select Column":
         st.write(df[col_transform])
     another_transformation = st.selectbox("Would you like another value transformation?", ["Select Option", "Yes", "No"])
@@ -146,8 +151,8 @@ def value_transform(df):
         return df
 
 def dtype_convert(df):
-    st.subheader("Removing Null Values")
-    st.write(df.isnull().sum())
+    st.subheader("Data Type Convert")
+    
 
     column_names = ["Select Column"]
     for i in df.columns:
@@ -175,6 +180,8 @@ def dtype_convert(df):
     return df
 
 def remove_null(df):
+    st.subheader("Remove Null Values")
+    st.write(df.isnull().sum())
     column_names = ["Select Column"]
     for i in df.columns:
         column_names.append(i)
@@ -199,7 +206,18 @@ def remove_null(df):
     st.write(df.shape)
 
     return df
-    
-df = value_transform(df)
-df = dtype_convert(df)
-df = remove_null(df)
+
+
+
+def main(df):
+    data_eda(df)
+    col_eda(df)
+    df = drop_columns(df)
+    if st.button("Confirm DF Changes"):
+        main(df)   
+    df = value_transform(df)
+    df = dtype_convert(df)
+    df = remove_null(df)
+
+df = file_upload()
+main(df)
