@@ -24,12 +24,12 @@ def file_upload():
 ###
   
 
-def data_eda(df):
+def data_eda(df, key):
     #st.sidebar.selectbox("Use Example CSV", ["dummy_df", "dumm_df_2"])
     
     
     eda_option = st.selectbox("Select EDA Option", ["View DF", "Head", "Tail", "Column Names",
-                                                    "Shape", "DF Stats", "Null Values"])
+                                                    "Shape", "DF Stats", "Null Values"], key="{}".format(key))
     if eda_option == "View DF":
         st.write(df)
     elif eda_option == "Head":
@@ -49,14 +49,14 @@ def data_eda(df):
 
 
 
-def col_eda(df):
+def col_eda(df, key):
     column_names = []
     for i in df.columns:
         column_names.append(i)
     col1, col2 = st.columns(2)
-    col_select = col1.selectbox("Select Columns to Explore", column_names)
+    col_select = col1.selectbox("Select Columns to Explore", column_names, key="{}".format(key))
     eda_select = col2.selectbox("Select Option to Explore", ["Choose Option", "Data Types", "Value Counts", "Mean", "Median",
-                                                            "Groupby & Mean", "Groupby & Median"])
+                                                            "Groupby & Mean", "Groupby & Median"], key="{}".format(key))
     if eda_select == "Data Types":
         st.write(df[col_select].dtypes)
     if eda_select == "Value Counts":
@@ -83,17 +83,20 @@ def col_eda(df):
             st.error("Invalid Data Type")
 
 
-def drop_columns(df):
+def drop_columns(df, key):
     st.subheader("Drop Columns")
     column_names = []
     for i in df.columns:
         column_names.append(i)
-    drop_cols = st.multiselect("Select Columns to be dropped.", column_names)
+    drop_cols = st.multiselect("Select Columns to be dropped.", column_names, key="{}".format(key))
     try:
         df = df.drop(drop_cols, axis=1)
     except:
         st.error("Invalid column names, please try again.")
     st.write(df.head(5))
+
+    
+        
     return df
 
 
@@ -117,16 +120,16 @@ def convert_to_float_if_error_return_zero(x):
 def float_regex(x):
     return re.findall(r"[-+]?\d*\.\d+|\d+", x)
 
-def value_transform(df):
+def value_transform(df, key):
     st.subheader("Value Transformations")
 
     column_names = ["Select Column"]
     for i in df.columns:
         column_names.append(i)
     col1, col2 = st.columns(2)
-    col_transform = col1.selectbox("Select Column to Transform", column_names)
+    col_transform = col1.selectbox("Select Column to Transform", column_names, key="{}".format(key))
     type_transform = col2.selectbox("Select Transformation", ["Select Option", "Replace Values", "Remove Whitespace",
-                                                              "Extract Positive Ints", "Extract Float"])
+                                                              "Extract Positive Ints", "Extract Float"], key="{}".format(key))
     if type_transform == "Remove Whitespace":
         df[col_transform] = df[col_transform].str.replace(" ", "")
     if type_transform == "Replace Values":
@@ -144,13 +147,10 @@ def value_transform(df):
         df[col_transform] = df[col_transform].apply(str)
     if col_transform != "Select Column":
         st.write(df[col_transform])
-    another_transformation = st.selectbox("Would you like another value transformation?", ["Select Option", "Yes", "No"])
-    if another_transformation == "Yes":
-        return value_transform(df)
-    else:
-        return df
+    
+    return df
 
-def dtype_convert(df):
+def dtype_convert(df, key):
     st.subheader("Data Type Convert")
     
 
@@ -158,8 +158,8 @@ def dtype_convert(df):
     for i in df.columns:
         column_names.append(i)
     col1, col2 = st.columns(2)
-    col_convert = col1.selectbox("Select Column to Convert Data Type", column_names)
-    type_convert = col2.selectbox("Select Type to Convert", ["Select Type", "String", "Int", "Float"])
+    col_convert = col1.selectbox("Select Column to Convert Data Type", column_names, key="{}".format(key))
+    type_convert = col2.selectbox("Select Type to Convert", ["Select Type", "String", "Int", "Float"], key="{}".format(key))
     if type_convert == "String":
         try:
             df[col_convert] = df[col_convert].astype(str)
@@ -179,15 +179,15 @@ def dtype_convert(df):
         st.write(df[col_convert])
     return df
 
-def remove_null(df):
+def remove_null(df, key):
     st.subheader("Remove Null Values")
     st.write(df.isnull().sum())
     column_names = ["Select Column"]
     for i in df.columns:
         column_names.append(i)
     col1, col2 = st.columns(2)
-    col_select = col1.selectbox("Select Column to replace Null with Mean or Median (Int or Float Only)", column_names)
-    option_select = col2.selectbox("Mean or Median", ["Select Option", "Mean", "Median"])
+    col_select = col1.selectbox("Select Column to replace Null with Mean or Median (Int or Float Only)", column_names, key="{}".format(key))
+    option_select = col2.selectbox("Mean or Median", ["Select Option", "Mean", "Median"], key="{}".format(key))
     if option_select == "Mean":
         try:
             df[col_select] = df[col_select].fillna(df[col_select].mean())
@@ -200,7 +200,7 @@ def remove_null(df):
             st.error("Invalid Column Type to fill with Median")
    
 
-    null_clean = st.selectbox("Drop All Null Values", ["Please Select Option", "Remove Null Values"])
+    null_clean = st.selectbox("Drop All Null Values", ["Please Select Option", "Remove Null Values"], key="{}".format(key))
     if null_clean == "Remove Null Values":
         df = df.dropna()
     st.write(df.shape)
@@ -209,15 +209,20 @@ def remove_null(df):
 
 
 
-def main(df):
-    data_eda(df)
-    col_eda(df)
-    df = drop_columns(df)
-    if st.button("Confirm DF Changes"):
-        main(df)   
-    df = value_transform(df)
-    df = dtype_convert(df)
-    df = remove_null(df)
-
+def main(df, key):
+    data_eda(df, key)
+    col_eda(df, key)
+    df = drop_columns(df, key)  
+    if st.button("Confirm Drop Column Changes", key="{}".format(key)):
+        return main(df, key+1)       
+    df = value_transform(df, key)
+    if st.button("Confirm Value Transform Changes", key="{}".format(key)):
+        return main(df, key+1)
+    df = dtype_convert(df, key)
+    if st.button("Confirm Data Convert Changes", key="{}".format(key)):
+        return main(df, key+1)
+    df = remove_null(df, key)
+    if st.button("Confirm Null Changes", key="{}".format(key)):
+        return main(df, key+1)
 df = file_upload()
-main(df)
+main(df, 1)
