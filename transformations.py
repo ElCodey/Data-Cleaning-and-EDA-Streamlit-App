@@ -1,6 +1,6 @@
 import streamlit as st
 
-from src.helpers import float_regex, convert_to_int_if_error_return_zero, convert_to_float_if_error_return_zero
+from helpers.py import float_regex, convert_to_int_if_error_return_zero, convert_to_float_if_error_return_zero
 
 
 def value_transform(df, key):
