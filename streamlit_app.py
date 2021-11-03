@@ -4,9 +4,9 @@ import pathlib
 
 sys.path.append(str(pathlib.Path().absolute()).split("/src")[0])
 
-from src.helpers import file_upload, drop_columns
-from src.eda import data_eda, col_eda
-from src.transformations import value_transform, dtype_convert, remove_null
+from helpers.py import file_upload, drop_columns
+from eda.py import data_eda, col_eda
+from transformations.py import value_transform, dtype_convert, remove_null
 
 
 
