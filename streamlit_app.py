@@ -19,24 +19,26 @@ st.sidebar.subheader("Upload CSV/Excel file or use Example CSV")
 # FKB always two empty lines between two functions, but only one line between comands
 
 
-def main(df, key):
+def main(df, key, session_key):
+    st.session_state.key = session_key
+    st.write(st.session_state.key)
     data_eda(df, key)
     col_eda(df, key)
     df = drop_columns(df, key)  
     if st.button("Confirm Drop Column Changes", key="{}".format(key)):
-        return main(df, key+1)       
+        return main(df, key+1, session_key+1)       
     df = value_transform(df, key)
     if st.button("Confirm Value Transform Changes", key="{}".format(key)):
-        return main(df, key+1)
+        return main(df, key+1, session_key+1)
     df = dtype_convert(df, key)
     if st.button("Confirm Data Convert Changes", key="{}".format(key)):
-        return main(df, key+1)
+        return main(df, key+1, session_key+1)
     df = remove_null(df, key)
     if st.button("Confirm Null Changes", key="{}".format(key)):
-        return main(df, key+1)
+        return main(df, key+1, session_key+1)
 
 
 if __name__ == "__main__":
     # FKB Protector which protects imports from executing this lines
     df = file_upload()
-    main(df, 1)
+    main(df, 1, 1)
